@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+#
+#will access art table
+#parse email addresses for each name
+#output the emails to a text file
+#
+use WWW::Mechanize;
+
+#url to retrieve
+$url = ''; #will be inserted later
+#may need to supply authentication information
+#
+#create new mech, enable autocheck
+#autocheck returns error if connection fails
+my $mech = WWW::Mechanize->new(autocheck => 1);
+
+#retrive page
+$mech->get($url);
+
+$links = $mech->find_all_links();
+
+print $links;

@@ -1,0 +1,79 @@
+#!/usr/bin/perl -wT
+######################################################################
+# 
+# Author: Adil Sadik
+# Date: May 5, 2011
+#
+# Project 2: This program will set up an online shop for
+# Frank's Eclectic Grocery Store. Inventory is stored in a flat-file.
+# A user can make selections as to what items he wants, and he will
+# then be given a page that gives him an invoice as to his order.
+# 
+######################################################################
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use Fcntl qw(:flock :seek);
+use strict;
+
+print header;
+print start_html("Frank's Eclectic Grocery: Your Invoice");
+
+#error-handling
+sub dienice {
+    my ($msg) = @_;
+    print "<h2>Error</h2>\n";
+    print $msg;
+    exit;
+}
+
+#ensures correct format for monetary output
+sub currency {  
+    my ($cost) = @_;  
+    return sprintf("\$%.2f", $cost);
+} 
+
+print <<EOF;
+<h1>Frank's Eclectic Grocery: Your Invoice</h1>
+Here is your order:
+EOF
+
+#display ordered products
+print qq(<hr><table border="1">
+	<tr><th>Description</th>
+	<th>Price</th>
+	<th>Number</th>
+	<th>Extd Amt</th></tr>);
+
+open(IN,"frank.txt") or &dienice("Can't open inventory:$!\n");
+flock(IN,LOCK_SH);
+seek(IN,0,SEEK_SET);
+my @data = <IN>;
+close(IN);
+
+my $cost;
+my $total = 0;
+
+foreach my $i (@data) {
+    chomp($i);
+    my($product,$price) = split(/\|/,$i);
+    my $quantity = param($product);
+    if ($quantity > 0) {
+	$total = $total + ($price * $quantity);
+	$cost = $price * $quantity;
+
+    print "<tr>
+    <td>$product</td>
+    <td>\$$price</td>
+    <td align='right'>$quantity</td><td align='right'>",currency($cost),"</td></tr>\n";
+    }
+}
+
+print qq(</table>);
+
+if ($total <= 0) {
+    &dienice("You didn't order anything!");
+}
+
+print "<p>Grand total: ",currency($total),"<hr>It has been your pleasure to be our customer!\n";
+
+print end_html;

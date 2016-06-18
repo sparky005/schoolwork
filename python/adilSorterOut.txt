@@ -1,0 +1,17 @@
+Adils-MBP:python adilsadik$ python mySorter2.py able spencer delta
+able
+delta
+spencer
+Adils-MBP:python adilsadik$ python mySorter2.py -r spencer able delta
+spencer
+delta
+able
+Adils-MBP:python adilsadik$ python mySorter2.py --reverse spencer able delta
+spencer
+delta
+able
+Adils-MBP:python adilsadik$ python mySorter2.py spencer able delta --reverse
+spencer
+delta
+able
+Adils-MBP:python adilsadik$ cp mySorter2.py adilSorter.py

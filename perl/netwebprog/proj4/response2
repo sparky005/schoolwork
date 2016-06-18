@@ -1,0 +1,107 @@
+#!/usr/bin/perl -wT
+
+# CISC 3300 Network and Web Programming
+# Programming Project 4: The BankCenter Revised
+# A web-based application that delivers customer information  
+# from a database about loans and saving accounts. 
+# @author Joshua Pachtman
+# @date 5/4/2011
+
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use Fcntl qw(:flock :seek);
+use DBI;
+use strict;
+
+my $cust_name = param('cust_name');
+my $type = param('kind'); # radio button 
+ # removes the "s" from loans and accounts
+my $desc = substr($type, -length($type)-1, length($type));
+# makes the first letter captial for loan and account
+my $first = ucfirst($desc);
+
+print header;
+print start_html("Welcome to the WalkOverYa BankCenter!");
+
+print <<EndofHTML;
+<h1>CISC 3300 Project 4: WalkOverYa BankCenter Information</h1>
+    <p>
+EndofHTML
+
+    if($cust_name eq "") { &dienice("Please enter a name."); } # Error message
+
+elsif($type eq "") { &dienice("Please select an account or loan.");}
+
+# produces information about financial instruments held by a given person
+produce_info($cust_name, $type);
+
+print qq(<p><hr><h2>Thank you for choosing The WalkOverYa BankCenter! </h2>);
+
+print end_html;
+
+sub produce_info{
+
+    my($customer,$type)= @_;
+    my $username = "janeuser";
+    my $password = "user4jane";
+    my $database = "dbi:Pg:dbname=proj4";
+    my $hostname = "dsm";
+    my $sql;
+    my $dbh = DBI->connect($database,$username, $password) # connecting to the database
+	or die "Couldn't connect to database: " . DBI->errstr;
+# look up the information through the database
+    if($type eq "accounts"){
+	$sql = $dbh->prepare('select account_number, balance from depositor natural join account where lower(customer_name) = lower(?)')
+	or die "Couldn't prepare statement: " . $dbh->errstr;
+    }
+    elsif( $type eq "loans"){
+	$sql = $dbh->prepare('select loan_number, amount from borrower natural join loan where lower(customer_name) = lower(?)')
+	or die "Couldn't prepare statement: " . $dbh->errstr;
+    }
+    $sql->execute($customer);
+
+# counters
+    my $ctr = 0;
+    my $rowcnt = 0;
+    my $total = 0;
+
+# finding the information
+	while(my($acc, $bal) = $sql->fetchrow_array){
+	    if($ctr == 0){
+
+# Captializes the first letter
+my $second = ucfirst($customer);
+
+# table
+print qq(<h2> $first information for $second</h2>);
+print qq(<table border="1"> 
+<tr>
+<th> $first Number</th>
+<th> Balance</th>
+</tr>);
+		$ctr++;
+	    }
+	    $bal = currency($bal); # customary manner
+	    $total += $bal;    
+	    print qq(<tr><td>$acc</td><td>\$$bal</td></tr>);
+	    $rowcnt++;
+	}
+    &dienice("No $type found for $customer.") if ($rowcnt == 0);
+
+	$total = currency($total);
+	print "<tr><td>Total</td><td>\$$total</td></tr>";
+	print qq(</table>);
+	$dbh->disconnect;
+}
+# To converted into customary manner.
+sub currency {  
+    my ($amount) = @_;  
+    return sprintf("\%.2f",$amount);  
+} 
+# Print error message
+sub dienice {
+    my ($msg) = @_;
+    print "<h2>Error</h2>\n";
+    print $msg;
+    exit;
+}

@@ -1,0 +1,124 @@
+#!/usr/bin/perl -wT
+######################################################################
+# Author: Adil Sadik
+#
+# Date: May 10, 2011
+# 
+# Description: A basic banking program. Stores customer information in 
+# flat files and can list account information at
+# user request.
+######################################################################
+
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use Fcntl qw(:flock :seek);
+use strict;
+
+my $name = param('cust_name');
+my $type = param('kind');
+my $dir = "/u/sobolev/agw/class/netwebprog/share/proj3";
+
+print header;
+print start_html("Ills Pierre BankCenter Information");
+
+print <<EOF;
+<h1>Ills Pierre BankCenter Information</h1>
+<p>
+EOF
+#handle input type
+#error handling for null input
+if($name eq " ")
+{ 
+    &dienice("Please enter your name");
+}
+
+if($type eq "accounts") {
+    produce_info($name, "depositor", "account");
+}
+elsif($type eq "loans") {
+    produce_info($name,"borrower","loan");
+}
+
+else
+{
+    dienice("This can't happen! Illegal financial instrument.");
+}
+
+
+print "<p><hr><h2>Thank you for choosing Ills Pierre BankCenter! </h2>";
+
+print end_html;
+
+#processes user input
+#returns appropriate information
+sub produce_info {
+    my ($name, $people, $money) = @_;
+    my $description = ucfirst($money);
+
+    #only use people matching the same name
+    open (PEOPLE, "$dir/$people.dat") || dienice("Couldn't open $people");
+    my @people = <PEOPLE>;
+    close (PEOPLE);
+
+    my @matching = grep(/^$name\|/i, @people);
+    if (scalar @matching==0) {
+	dienice("Nothing found");
+    }
+
+    #make sure we use properly-formatted name for output
+    my ($proper_name) = split(/\|/, $matching[0]);
+
+    #list numbers
+    my @fin_numbers;
+    foreach my $line (@matching) {
+	chomp($line);
+	my ($person, $inst_num) = split(/\|/, $line);
+	push(@fin_numbers, $inst_num);
+    }
+
+    open (MONEY, "$dir/$money.dat") || dienice ("Couldn't open $money");
+    my @fin_insts = <MONEY>;
+    close (MONEY);
+
+    my %amounts = ();
+    foreach my $line (@fin_insts) {
+	chomp ($line);
+	my ($inst_num, $amount) = split(/\|/, $line);
+	$amounts{$inst_num} = $amount;
+    }
+
+    #find totals
+    my $sum = 0;
+    foreach my $inst_num (@fin_numbers) {
+	if (exists $amounts{$inst_num}) {
+	    $sum += ($amounts{$inst_num});
+	}
+	else {
+	    dienice ("No amount found");
+	}
+    }
+
+#print the output
+
+    print qq(<h2>$description information for $proper_name</h2>\n);
+    print qq(<table border>\n);
+    print qq(<tr><th>$description Number</th><th>Balance</th></tr>\n);
+    foreach my $inst_num (@fin_numbers) {
+	print qq(<tr><td>$inst_num</td>);
+	printf '<td>$%.2f</td>', $amounts{$inst_num};
+	print qq(</tr>\n);
+    }
+    print qq(<tr><td>Total</td>);
+    printf '<td>$%.2f</td>', $sum;
+    print qq(</tr>\n);
+    print qq(</table>\n);
+    print qq(<p>\n);
+}
+
+# Print error message
+sub dienice {
+    my ($msg) = @_;
+    print "<h2>Error</h2>\n";
+    print $msg;
+    exit;
+}

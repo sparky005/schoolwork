@@ -1,0 +1,29 @@
+adils-mbp:scripting adilsadik$ perl adilSorter.pl zebra orange apple cat dog litter
+apple
+cat
+dog
+litter
+orange
+zebra
+adils-mbp:scripting adilsadik$ perl adilSorter.pl -r zebra orange apple cat dog litter
+zebra
+orange
+litter
+dog
+cat
+apple
+adils-mbp:scripting adilsadik$ perl adilSorter.pl --reverse zebra orange apple cat dog litter
+zebra
+orange
+litter
+dog
+cat
+apple
+adils-mbp:scripting adilsadik$ perl adilSorter.pl zebra orange apple cat dog litter --reverse
+zebra
+orange
+litter
+dog
+cat
+apple
+adils-mbp:scripting adilsadik$ 

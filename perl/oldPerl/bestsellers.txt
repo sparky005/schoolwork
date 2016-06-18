@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&rt;
+<html xmlns="http://www.w3.org/1999/xhtml"&rt;
+
+<head>
+   <title>Computer Books</title>
+</head>
+
+<body>
+
+<h3>Sales Data, Week of December 13, 2004</h3>
+<table border="1">
+     <tr>
+          <th>ISBN</th>
+          <th>Title</th>
+          <th>MTD Sales</th>
+          <th>YTD Sales</th>
+     </tr>
+     <tr>
+          <td>1-23456-789-0</td>
+          <td><a href="/details/1-23456-789-0/">Cooking with PHP</a></td>
+          <td>548</td>
+          <td>5,678</td>
+     </tr>
+     <tr>
+          <td>0-98765-432-1</td>
+          <td><a href="/details/0-98765-432-1/">Prolific Perl</a></td>
+          <td>378</td>
+          <td>3,456</td>
+     </tr>
+     <tr>
+          <td>6-78901-234-5</td>
+          <td><a href="/details/6-78901-234-5/">Managing Markets with MySQL</a></td>
+          <td>973</td>
+          <td>7,121</td>
+     </tr>
+     <tr>
+          <td>1-24245-456-9</td>
+          <td><a href="/details/1-24245-456-9/">A History of Keyboards</a></td>
+          <td>787</td>
+          <td>2,290</td>
+     </tr>
+</table>
+
+</body>
+
+</html>

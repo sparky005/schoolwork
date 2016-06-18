@@ -1,0 +1,105 @@
+#!/usr/bin/perl -wT
+######################################################################
+#
+# Author: Adil Sadik
+# Date: May 10, 2011
+# 
+# Description: A basic banking program. Stores customer information in 
+# a PostgreSQL database and can list account information at
+# user request. Essentially a modified version of previous project
+# using a database instead of flat files.
+######################################################################
+
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use Fcntl qw(:flock :seek);
+use DBI;
+use strict;
+
+my $name = param('cust_name');
+my $type = param('kind');
+
+print header;
+print start_html("Ills Pierre BankCenter Information");
+
+print <<EOF;
+<h1>Ills Pierre BankCenter Information</h1>
+<p>
+EOF
+
+#process user input
+#error handling for null input
+if($name eq " ")
+{ 
+    &dienice("Please enter your name");
+}
+
+if($type eq "accounts") {
+    produce_info($name, "depositor", "account", "balance");
+}
+elsif($type eq "loans") {
+    produce_info($name,"borrower","loan", "amount");
+}
+else
+{
+    dienice("This can't happen! Illegal financial instrument.");
+}
+
+
+print "<p><hr><h2>Thank you for choosing Ills Pierre BankCenter! </h2>";
+
+print end_html;
+
+#processes data
+#outputs requested data
+sub produce_info {
+    my ($name, $people, $money, $kind) = @_;
+    my $description = ucfirst($money);
+
+#connect to dbase
+    my $db = DBI->connect("dbi:Pg:dbname=proj4", "janeuser","user4jane") or dienice("Can't connect to dbase");
+
+$name = lc($name);
+$name = ucfirst($name);
+
+    #ask db for customer info
+    my $cmd = "select $money" . "_number, $kind\n";
+    $cmd .= qq(from $people natural join $money\n);
+    $cmd .= qq(where customer_name = '$name');
+    my $st = $db->prepare($cmd) or dienicedb($db, $db->errstr);
+    my $rv = $st->execute or dienicedb($db, $db->errstr);
+    if($rv ==0) {
+	dienicedb($db, "Nothing found");
+    }
+    $db->disconnect;
+
+    #print the output
+    print qq(<h2>$description information for $name</h2>\n);
+    print qq(<table border>\n);
+    print qq(<tr><th>$description Number</th><th>Balance</th></tr>\n);
+    my $sum = 0;
+    while (my ($num, $amount) = $st->fetchrow_array) {
+	$sum += $amount;
+	my $formattedAmount = sprintf("\$%.2f", $amount);
+	print qq(<tr><td>$num</td><td>$formattedAmount</td></tr>\n);
+    }
+    my $formattedSum = sprintf("\$%.2f", $sum);
+    print qq(<tr><td>Total</td><td>$formattedSum</td></tr>\n);
+    print qq(</table>\n);
+    print qq(<p>\n);
+}
+
+#error-handling subroutines
+sub dienice {
+    my ($msg) = @_;
+    print "<h2>Error</h2>\n";
+    print $msg;
+    exit;
+}
+
+sub dienicedb {
+    my ($db, $error) = @_;
+    $db -> disconnect;
+    print "$error";
+    exit;
+}

@@ -1,0 +1,48 @@
+#!/usr/bin/perl -wT
+
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use strict;
+
+
+my @operand = ('+','-','*','/','%');
+my $op = $operand[int(rand(@operand))];
+
+my $left_num;
+my $right_num;
+my @numbers;
+
+if (($op eq '/') || ($op eq '%')) {
+  $left_num = int(rand(100));
+  @numbers = (1,2,3,4,5,6,7,8,9,10);
+  $right_num= $numbers[int(rand(@numbers))];
+} elsif (($op eq '+') || ($op eq '-') || ($op eq '*')) {
+
+  $left_num = int(rand(10));
+  $right_num = int(rand(10));
+
+}
+
+print header;
+print start_html("CISC 3300 Final Project");
+
+
+print qq (CISC 3300 Final Project: Arithmetic Drilling);
+
+print<<EndofHTML;
+<form action="answer" method="POST">
+
+EndofHTML
+print qq($left_num $op $right_num =  <td><input type= "text" name = "student_ans"</td>);
+
+print qq(<br>
+<input type ="submit" value = "Check answer!">
+<input type ="reset"  value = "Clear">
+<input type ="hidden" name = "operator" value = "$op">
+<input type ="hidden" name = "left" value = "$left_num">
+<input type ="hidden" name = "right" value ="$right_num">
+);
+
+print qq(</form>);
+print "DEBUG: operator should be '$op'<br/>\n";
+print end_html;

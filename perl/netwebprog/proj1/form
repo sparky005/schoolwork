@@ -1,0 +1,43 @@
+#!/usr/bin/perl -wT
+use CGI qw(:standard);
+use strict;
+
+######################################################################
+# 
+# Project 1: A Payroll Calculator
+#
+# Author: Adil Sadik
+# Date: February 7, 2011
+#
+# Description: This application calculates an employee's gross pay.
+# Accounts for overtime pay as well.
+######################################################################
+
+print header;
+print start_html("Payroll Calculator");
+
+print <<EOF;
+
+<h1>Payroll Calculator</h1>
+<form action = "process" method = "POST">
+<table>
+	<tr>
+		<td>Employee Name</td>
+		<td><input type = "text" name = "employeeName"></td>
+	</tr>
+	<tr>
+		<td>Hours Worked</td>
+		<td><input type = "text" name = "hoursWorked" size = 5></td>
+	</tr>
+	<tr>
+		<td>Hourly Wage</td>
+		<td>\$<input type = "text" name = "hourlyWage" size = 5></td>
+	</tr>
+</table>
+
+<input type = "submit" value = "Calculate">
+<input type = "reset" value = "Clear Form">
+</form>
+EOF
+
+print end_html();

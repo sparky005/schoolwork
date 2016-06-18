@@ -1,0 +1,73 @@
+#!/usr/bin/perl -wT
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use strict;
+
+# calc_ans will be a container that holds the correct answer
+
+print header;
+print start_html("CISC 3300 Final Project: Arithmetic Drilling");
+print "<h1>CISC 3300 Final Project: Arithmetic Drilling</h1>";
+
+my $correct;
+my $question_counter;
+my $correct_counter;
+my $right_num2 = param('right');
+my $left_num2 = param('left');
+my $stud_ans= param('student_ans');
+my $calc_ans;
+my $op= param('operator');
+
+print qq($left_num2 $op $right_num2<br>);
+
+if ($op eq '-') {
+  $calc_ans = ($left_num2 - $right_num2);
+} elsif ($op eq '+') {
+  $calc_ans = ($left_num2 + $right_num2);
+} elsif ($op eq '*') {
+  $calc_ans = ($left_num2 * $right_num2);
+} elsif ($op eq '/') {
+  $calc_ans = ($left_num2 / $right_num2);
+} elsif ($op eq '%') {
+  $calc_ans = ($left_num2 % $right_num2);
+} else {
+  &dienice("This can't happen: illegal operation $op");
+}
+
+##### next take an input (the students answer) from the "question"
+#interface and compare it to calc_an
+
+
+for ($stud_ans) {
+  $question_counter++;
+}
+
+
+if ($stud_ans == $calc_ans) {
+  $correct_counter++;
+}
+
+my $percentage = (($correct_counter/$question_counter)*100);
+
+print qq (Your answer: $stud_ans <br>);
+print qq (True answer: $calc_ans <br><br>);
+if ($stud_ans == $calc_ans) {
+  print qq(<b>Correct!</b>);
+} else {
+  print qq(<b>Incorrect</b>);
+}
+
+print qq(Score so far: $correct_counter out of $question_counter
+ ($percentage percent));
+print qq(<br><a href= "question"> Try Another Problem </a> );
+
+
+print end_html;
+
+sub dienice{
+  my($msg) = @_;
+  print "<h2>Error</h2>\n";
+  print $msg;
+  exit;
+}
+

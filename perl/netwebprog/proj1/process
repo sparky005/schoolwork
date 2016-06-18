@@ -1,0 +1,124 @@
+#!/usr/bin/perl -wT
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use strict;
+
+#this script processes the input from the previous page
+#calculates the wages
+#and prints them in a pretty format
+print header;
+#converts currency values into
+#proper format ie $10.00
+sub currency {
+    my ($amount) = @_;
+    return sprintf("\$%.2f", $amount);
+}
+
+#calculates gross pay
+#needs no further processing if hours<40
+sub grossPay {
+    my ($hoursWorked, $hourlyWage) = @_;
+    return @_[0]*@_[1];
+}
+
+
+#total overtime pay
+sub grossPayOvertime {
+    my ($basePay, $overtimePay) = @_;
+    return @_[0]+@_[1];
+}
+
+#calculates base pay for 40-hour week
+#used to help calculate gross overtime pay
+sub basePay {
+    my ($hourlyWage) = @_;
+    return 40*@_[0];
+}
+
+#calculates additional overtime pay
+#used to help calculate gross overtime pay
+sub overtimePay {
+    my ($hoursWorked, $hourlyWage) = @_;
+    return ($hoursWorked-40) * 1.5 * $hourlyWage;
+}
+
+#output information if employee worked <40 hours
+sub underForty {
+    my ($name, $hoursWorked, $hourlyWage) = @_;
+    print "<table border>";
+    print "<tr>";
+    print "<td>Hours Worked</td>";
+    print "<td> $hoursWorked </td>";
+    print "</tr>";
+    print "<tr>";
+    print "<td>Hourly Rate</td>";
+    print "<td>" . currency($hourlyWage) . "</td>";
+    print "</tr>";
+    print "<tr>";
+    print "<td>Gross Pay</td>";
+    print "<td>" . currency(grossPay($hoursWorked, $hourlyWage)) . "</td>";
+    print "</tr>";
+    print "</table>";
+    print end_html();
+}
+
+#output information if employee worked >40 hours
+sub overForty {
+    my ($name, $hoursWorked, $hourlyWage) = @_;
+    print "<table border>";
+    print "<tr>";
+    print "<td>Hours Worked</td>";
+    print "<td> $hoursWorked </td>";
+    print "</tr>";
+    print "<tr>";
+    print "<td>Hourly Rate</td>";
+    print "<td>" . currency($hourlyWage) . "</td>";
+    print "</tr>";
+    print "<tr>";
+    print "<td>Base Pay</td>";
+    print "<td>" . currency(basePay($hourlyWage)) . "</td>";
+    print "</tr>";
+    print "<tr>";
+    print "<td>Overtime Pay</td>";
+    print "<td>" . currency(overtimePay($hoursWorked, $hourlyWage)) . "</td>";
+    print "</tr>";
+    print "<tr>";
+    print "<td>Gross Pay</td>";
+    print "<td>" . currency(grossPayOvertime(basePay($hourlyWage), overtimePay($hoursWorked, $hourlyWage))) . "</td>";
+    print "</tr>";
+    print "</table>";
+    print end_html();
+}
+#store parameters in global variables
+#for easier access
+my $name = param('employeeName');
+my $hoursWorked = param('hoursWorked');
+my $hourlyWage = param('hourlyWage');
+
+#process the information provided
+#decides how to handle input information
+#also does rudimentary error-checking
+sub process {
+    my ($name, $hoursWorked, $hourlyWage) = @_;
+    if ($hoursWorked > (24*7) || $hoursWorked < 0) {
+	print "<h2>Error</h2>";
+    }
+    if ($hoursWorked > (24*7) || $hoursWorked < 0) {
+	print "Hours worked this week: $hoursWorked... Impossible!<br/>";
+    }
+    if ($hourlyWage < 0) {
+	print "Hourly wage: $hourlyWage... Impossible!<br/>";
+    }
+    #elsif ($hourlyWage < 7.25) {
+#	print "Hourly wage " . currency($hourlyWage) . " is under minimum wage!";
+#    }
+    elsif ($hoursWorked > 40) {
+	overForty($name, $hoursWorked, $hourlyWage);
+    }
+    elsif ($hoursWorked >= 0 ) {
+	underForty($name, $hoursWorked, $hourlyWage);
+    }
+}
+print start_html("Payroll Results for $name");
+print "<h1>Payroll Results for $name</h1>";
+process($name, $hoursWorked, $hourlyWage);

@@ -1,0 +1,17 @@
+<head>
+    <title>Temperature Converter</title>
+</head>
+
+<body>
+    <h1>Temperature Converter</h1>
+    </br>
+    <form enctype = 'multipart/form-data' action = 'converter.php' method = 'post'>
+	<p>Please choose your temperature file</p>
+	<p>This file should be a colon-separated list</p>
+	<p>Ex: 45:c</p>
+	<label for = 'file'>Filename:</label>
+	<input type = 'file' name = 'file' id = 'file'>
+	</br>
+	<input type = 'submit' value = 'Submit'/>
+    </form>
+</body>

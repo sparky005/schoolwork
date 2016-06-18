@@ -1,0 +1,79 @@
+#!/usr/bin/perl -wT
+######################################################################
+# 
+# Author: Adil Sadik
+# Date: May 5, 2011
+# 
+# Project 2: This program will set up an online shop for
+# Frank's Eclectic Grocery Store. Inventory is stored in a flat-file.
+# A user can make selections as to what items he wants, and he will
+# then be given a page that gives him an invoice as to his order.
+# 
+######################################################################
+
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use Fcntl qw(:flock :seek);
+use strict;
+
+#open inventory
+open(IN,"frank.txt") or &dienice("Can't open inventory: $! \n");
+
+#shared lock allows multiple users
+#access to page
+flock(IN, LOCK_SH);
+
+seek(IN, 0, SEEK_SET);
+my @data = <IN>;
+close(IN);
+
+print header;
+print start_html("Frank's Eclectic Grocery: Order Form");
+
+#error-handling
+sub dienice {
+    my $msg = @_;
+    print "<h2>Error</h2>\n";
+    print $msg;
+}
+print <<EOF;
+
+<h1>Frank's Eclectic Grocery: Order Form</h1>
+Welcome to <b>Frank's Eclectic Grocery Store</b>, where service isn't
+just a motto... it's a slogan!
+<hr>
+Please enter your order:
+<p> <form action="process" method="POST"> </p>
+EOF
+
+#display order form
+print <<EOF;
+<table border="1">
+<tr><th>Description</th>
+<th>Price</th>
+<th>Number</th></tr>
+EOF
+
+foreach my $i (@data) {
+chomp($i);
+my ($product, $price) = split(/\|/,$i);
+print <<EOF;
+<tr><td>$product</td>
+<td align="right">
+\$$price</td>
+<td>
+<center><input type="text" name="$product" size=4></center>
+</td></tr>
+EOF
+}
+
+print <<EOF;
+</table>
+<p>
+<input type="submit" value="Place order">
+<input type="reset" value="Clear order">
+</p>
+</form>
+EOF
+
+print end_html;
